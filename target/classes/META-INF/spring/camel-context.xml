@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xmlns:cxf="http://camel.apache.org/schema/cxf"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:http="http://cxf.apache.org/transports/http/configuration"
+       xmlns:sec="http://cxf.apache.org/configuration/security"
+       xmlns:cxfcore="http://cxf.apache.org/core"
+       xmlns:httpj="http://cxf.apache.org/transports/http-jetty/configuration" 
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+        http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd
+       http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+      http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd
+     http://cxf.apache.org/configuration/security http://cxf.apache.org/schemas/configuration/security.xsd
+      http://cxf.apache.org/transports/http-jetty/configuration http://cxf.apache.org/schemas/configuration/http-jetty.xsd
+     ">
+       
+	<cxfcore:bus/>
+  <!-- this is the CXF web service we use as the front end -->
+<!--   <cxf:cxfEndpoint id="backendServiceEndpoint"
+                   address="http://0.0.0.0:9191/cxf/test"
+                   serviceClass="com.demo.ihis.ws.BackEndWebService"/>
+ -->
+ 	<!-- will use port 8181 when deployed into fuse -->
+<!--    <cxf:cxfEndpoint id="backendServiceEndpoint"
+                   address="/test"
+                   serviceClass="com.demo.ihis.ws.BackEndWebService"/>
+ -->
+   <cxf:cxfEndpoint id="backendServiceEndpoint"
+                   address="https://0.0.0.0:8443/cxf/test"
+                   serviceClass="com.demo.ihis.ws.BackEndWebService"/>
+<!--         
+  <http:conduit name="conduit1">
+    <http:tlsClientParameters disableCNCheck="true">
+      <sec:trustManagers>
+        <sec:keyStore type="JKS" password="password" file="keys/server.ks"/>
+      </sec:trustManagers>
+      <sec:cipherSuitesFilter>
+        <sec:include>.*_EXPORT_.*</sec:include>
+        <sec:include>.*_EXPORT1024_.*</sec:include>
+        <sec:include>.*_WITH_DES_.*</sec:include>
+        <sec:include>.*_WITH_NULL_.*</sec:include>
+        <sec:exclude>.*_DH_anon_.*</sec:exclude>
+      </sec:cipherSuitesFilter>
+    </http:tlsClientParameters>
+  </http:conduit>
+ -->
+ 
+     <httpj:engine-factory bus="cxf">
+      <httpj:engine port="8443">
+        <httpj:tlsServerParameters>
+          <sec:keyManagers keyPassword="password">
+            <sec:keyStore file="certs/server.ks" password="password" type="JKS"/>
+          </sec:keyManagers>
+          <sec:trustManagers>
+            <sec:keyStore file="certs/server.ks" password="password" type="JKS"/>
+          </sec:trustManagers>
+          <sec:cipherSuitesFilter>
+            <sec:include>.*_WITH_3DES_.*</sec:include>
+            <sec:include>.*_WITH_DES_.*</sec:include>
+            <sec:exclude>.*_WITH_NULL_.*</sec:exclude>
+            <sec:exclude>.*_DH_anon_.*</sec:exclude>
+          </sec:cipherSuitesFilter>
+          <sec:clientAuthentication want="true" required="false"/>
+        </httpj:tlsServerParameters>
+      </httpj:engine>
+    </httpj:engine-factory>          
+ <camelContext xmlns="http://camel.apache.org/schema/spring">
+
+    <route>
+      <!-- route starts from the cxf webservice -->
+      <from uri="cxf:bean:backendServiceEndpoint" />
+      <log message="incoming..."/>
+      <to uri="seda:incomingMsg" />
+      <!-- and then create the OK reply for the webservice which is still waiting for a reply -->
+      <transform>
+        <constant>OK</constant>
+      </transform>
+    </route>
+    <route>
+      <from uri="seda:incomingMsg" />
+      <log message="in seda...."/>
+      <log message="${body}"/>
+    </route>
+    
+      
+<!--         <route id="cbr-route">
+        <from uri="jetty:http://0.0.0.0:8080/myapp/myservice/?sessionSupport=true"/>
+            <log id="_log1" message="Receiving order ${body}"/>
+        </route>
+ -->    
+ 
+ 	</camelContext>
+</beans>
