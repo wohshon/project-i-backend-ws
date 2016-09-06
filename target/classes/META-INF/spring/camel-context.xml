@@ -33,23 +33,11 @@
    <cxf:cxfEndpoint id="backendServiceEndpoint"
                    address="https://0.0.0.0:8443/cxf/test"
                    serviceClass="com.demo.ihis.ws.BackEndWebService"/>
-<!--         
-  <http:conduit name="conduit1">
-    <http:tlsClientParameters disableCNCheck="true">
-      <sec:trustManagers>
-        <sec:keyStore type="JKS" password="password" file="keys/server.ks"/>
-      </sec:trustManagers>
-      <sec:cipherSuitesFilter>
-        <sec:include>.*_EXPORT_.*</sec:include>
-        <sec:include>.*_EXPORT1024_.*</sec:include>
-        <sec:include>.*_WITH_DES_.*</sec:include>
-        <sec:include>.*_WITH_NULL_.*</sec:include>
-        <sec:exclude>.*_DH_anon_.*</sec:exclude>
-      </sec:cipherSuitesFilter>
-    </http:tlsClientParameters>
-  </http:conduit>
- -->
- 
+   <cxf:cxfEndpoint id="clearBackendServiceEndpoint"
+                   address="/test"
+                   serviceClass="com.demo.ihis.ws.BackEndWebService"/>
+                   
+                   
      <httpj:engine-factory bus="cxf">
       <httpj:engine port="8443">
         <httpj:tlsServerParameters>
@@ -70,11 +58,24 @@
       </httpj:engine>
     </httpj:engine-factory>          
  <camelContext xmlns="http://camel.apache.org/schema/spring">
+    <route>
+      <!-- route starts from the cxf webservice -->
+      <from uri="cxf:bean:clearBackendServiceEndpoint" />
+      <log message="incoming...in clear"/>
+      <to uri="seda:incomingMsg" />
+      <!-- and then create the OK reply for the webservice which is still waiting for a reply -->
+      <transform>
+        <constant>OK</constant>
+      </transform>
+    </route>
 
     <route>
       <!-- route starts from the cxf webservice -->
       <from uri="cxf:bean:backendServiceEndpoint" />
-      <log message="incoming..."/>
+            <log message="************************************************INCOMING*******************************************************"/>
+
+    <to uri="log:myLog?showAll=true&amp;multiline=true"/>
+      
       <to uri="seda:incomingMsg" />
       <!-- and then create the OK reply for the webservice which is still waiting for a reply -->
       <transform>
@@ -84,7 +85,9 @@
     <route>
       <from uri="seda:incomingMsg" />
       <log message="in seda...."/>
-      <log message="${body}"/>
+            <log message="************************************************SEDA*******************************************************"/>
+      
+    <to uri="log:myLog?showAll=true&amp;multiline=true"/>
     </route>
     
       
