@@ -20,6 +20,8 @@
      ">
        
 	<cxfcore:bus/>
+	<bean id="processBean" class="com.demo.ihis.ws.ProcessBean"/>   						
+	
   <!-- this is the CXF web service we use as the front end -->
 <!--   <cxf:cxfEndpoint id="backendServiceEndpoint"
                    address="http://0.0.0.0:9191/cxf/test"
@@ -84,6 +86,7 @@
     </route>
     <route>
       <from uri="seda:incomingMsg" />
+            <to uri="bean:processBean?method=checkOutput"/>
       <log message="in seda...."/>
             <log message="************************************************SEDA*******************************************************"/>
       
