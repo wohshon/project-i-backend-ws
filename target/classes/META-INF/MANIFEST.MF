@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1473661298942
+Bnd-LastModified: 1473859901500
 Build-Jdk: 1.8.0_92
 Built-By: virtuser
 Bundle-Description: POC

@@ -91,14 +91,9 @@
             <log message="************************************************SEDA*******************************************************"/>
       
     <to uri="log:myLog?showAll=true&amp;multiline=true"/>
+    <!-- output to file -->
+    <to uri="file:///tmp/hl7-output"/>
     </route>
-    
-      
-<!--         <route id="cbr-route">
-        <from uri="jetty:http://0.0.0.0:8080/myapp/myservice/?sessionSupport=true"/>
-            <log id="_log1" message="Receiving order ${body}"/>
-        </route>
- -->    
- 
+
  	</camelContext>
 </beans>
