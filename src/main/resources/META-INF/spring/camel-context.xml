@@ -82,7 +82,8 @@
       <!-- and then create the OK reply for the webservice which is still waiting for a reply -->
       <transform>
         <constant>OK</constant>
-      </transform>
+    <!--<simple>${body}</simple>--> 		 
+ 	</transform>
     </route>
     <route>
       <from uri="seda:incomingMsg" />
